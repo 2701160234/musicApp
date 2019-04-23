@@ -2,6 +2,9 @@ from django.shortcuts import render,redirect
 import os
 from django.conf import settings
 import time,random
+
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import User
 from django.contrib.auth import logout
 from django.http import HttpResponse
@@ -11,6 +14,7 @@ def index(request):
     name = request.session.get('username','未登录')
     return render(request,'myApp/index.html',{'title':name})
 
+@csrf_exempt
 def login(request):
     if request.method == 'POST':
         try:
@@ -18,11 +22,11 @@ def login(request):
             if request.POST.get('passwd') == User.userobj.get(userId=userId).userPwd:
                 request.session['username'] = User.userobj.get(userId=userId).userName
                 request.session['token'] = str(time.time() + random.randrange(0,100000))
-                return redirect('/index/')
+                return JsonResponse({"status":"true"})
             else:
-                return HttpResponse("密码错误")
+                return JsonResponse({"status":"pwdError"})
         except User.DoesNotExist as e:
-            return HttpResponse("账号不存在")
+            return JsonResponse({"status":"idNot"})
     else:
         return render(request,'myApp/login.html')
 
