@@ -36,12 +36,8 @@ def resign(request):
         userPwd = request.POST.get('userPwd')
         userName = request.POST.get('userName')
         userRank = 0
-        f = request.FILES.get('userImg')
-        filePath = os.path.join(settings.MDEIA_ROOT,userId+'.jpg')
-        userImg = filePath
-        with open(filePath,'wb') as fp:
-            for data in f.chunks():
-                fp.write(data)
+
+        userImg = os.path.join(settings.MDEIA_ROOT,'default.png')
         userToken = str(time.time() + random.randrange(0,100000))
         user = User.userobj.createUser(userId,userName,userPwd,userImg,userToken,userRank)
         user.save()
@@ -54,3 +50,22 @@ def resign(request):
 def out(request):
     logout(request)
     return redirect('/index/')
+
+
+@csrf_exempt
+def checkuserid(request):
+    userId = request.POST.get("userId")
+    try:
+        user = User.userobj.get(userId=userId)
+        return JsonResponse({"status":"idExist"})
+    except User.DoesNotExist:
+        return JsonResponse({"status": "idNotExist"})
+
+
+# def upImage(request):
+#     f = request.FILES.get('userImg')
+#     filePath = os.path.join(settings.MDEIA_ROOT,userId+'.jpg')
+#     userImg = filePath
+#     with open(filePath,'wb') as fp:
+#         for data in f.chunks():
+#             fp.write(data)
